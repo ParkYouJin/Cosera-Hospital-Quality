@@ -38,16 +38,18 @@
   #invalid state, outcome설정
   states<-new_data[,"state"]
   outcomes<-c("heart attack", "heart failure", "pneumonia")
-  if((state %in% states)==FALSE){
+  if(!state %in% states){
     stop(print("invalid state"))
-  } else if((outcome %in% outcomes)==FALSE){
+  } else if(!outcome %in% outcomes){
     stop(print("invalid outcome"))
   } else if(is.numeric(num)){
     #해당state뽑아내기
+    
   st<-new_data[which(state==new_data[,"state"]),]
-    #numeric후 오름차순으로 order
-  st[,outcome]<-as.numeric(st[,outcome])
-  st<-st[order(st[,outcome], na.last=TRUE),]
+    #NA제거 후 numeric후 오름차순으로 order
+  st[,outcome]<-as.numeric(as.character(st[,outcome]))
+  st<-st[complete.cases(st[,outcome]),]
+  st<-st[order(st[,outcome]),]
   #num가 state개수 범위 내에 해당하지 않을 때 stop
   if(num >length(st[,2])){
     stop(NA)
@@ -62,13 +64,14 @@
     if(num=="best"){
       result<-best(state, outcome)
     } else if(num=="worst"){
-      #rank가 worst일때 내림차순의 첫번째 hospital표시
+      #rank가 worst일때 NA제거 후 내림차순의 첫번째 hospital표시
       wt<-new_data[which(state==new_data[,"state"]),]
-      wt[,outcome]<-as.numeric(wt[,outcome])
-      wt<-wt[order(wt[,outcome], decreasing=TRUE, na.last=TRUE),]
+      wt[,outcome]<-as.numeric(as.character(wt[,outcome]))
+      wt<-wt[complete.cases(wt[,outcome]),]
+      wt<-wt[order(wt[,outcome], decreasing=TRUE),]
       result<-wt[,"hospital"][1]
       return(result)
     }
   }
   }
-  
+rankhospital(state="TX",outcome="heart failure",num=4)
